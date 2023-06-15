@@ -28,40 +28,36 @@ bot.on('messageCreate', async (message) => {
     if (!channelIds.includes(message.channel.id))
         return;
     //add prefix so that people don't active bot on accident
-    if (message.content.startsWith('/')) {
-        //create log array for bot to reference messages and push content to array
-        let conversationLog = [{ role: "user", content: "You are a friendly chat bot." }];
-        conversationLog.push({
-            role: "user",
-            content: message.content,
-        });
-        //notify user the bot is responding
-        await message.channel.sendTyping();
-        //reference up to 15 previous messages
-        let prevMessages = await message.channel.messages.fetch({ limit: 15 });
-        prevMessages.reverse();
-        prevMessages.forEach((msg) => {
-            if (msg.author.id !== message.author.id)
-                return;
-            conversationLog.push({
-                role: 'user',
-                content: msg.content,
-            });
-        });
-        //create response
-        const response = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: conversationLog,
-        });
-        const replyMessage = response.data.choices[0].message;
-        //check to see if  reply is not null, if not then send the response
-        if (replyMessage) {
-            message.reply(replyMessage);
-        }
-    }
-    //do nothing if message doesn't start with prefix
-    else {
+    if (!message.content.startsWith('/'))
         return;
+    //create log array for bot to reference messages and push content to array
+    let conversationLog = [{ role: "user", content: "You are a friendly chat bot." }];
+    conversationLog.push({
+        role: "user",
+        content: message.content,
+    });
+    //notify user the bot is responding
+    await message.channel.sendTyping();
+    //reference up to 15 previous messages
+    let prevMessages = await message.channel.messages.fetch({ limit: 15 });
+    prevMessages.reverse();
+    prevMessages.forEach((msg) => {
+        if (msg.author.id !== message.author.id)
+            return;
+        conversationLog.push({
+            role: 'user',
+            content: msg.content,
+        });
+    });
+    //create response
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: conversationLog,
+    });
+    const replyMessage = response.data.choices[0].message;
+    //check to see if  reply is not null, if not then send the response
+    if (replyMessage) {
+        message.reply(replyMessage);
     }
 });
 //log bot into discord
